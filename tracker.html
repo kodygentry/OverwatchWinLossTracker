@@ -1,0 +1,256 @@
+<style>
+body {
+  font-family: sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: rgb(34, 34, 52);
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+h1, h2 {
+  text-align: center;
+  font-size: 24px;
+  color: rgb(255, 254, 254);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+  background-color: rgb(66, 66, 102);
+  border: 1px solid #ccc;
+  color:rgb(255, 255, 255);
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: left;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+}
+
+tr:nth-child(even) {
+  background-color: #635b72;
+}
+
+input[type="text"], input[type="date"], select {
+  background-color: rgb(55, 55, 61);
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+}
+
+input[type="submit"] {
+  background-color: rgb(50, 50, 71);;
+  color: white;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+input[type="submit"]:hover {
+  opacity: 0.8;
+}
+
+#clear-data-button {
+  background-color: rgb(50, 50, 71);;
+  color: white;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+#clear-data-button:hover {
+  opacity: 0.8;
+}
+
+#save-button {
+  float: right;
+  background-color: rgb(50, 50, 71);;
+  color: white;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+#save-button:hover {
+  opacity: 0.8;
+}
+
+label{
+  color:#ffffff
+}
+
+
+  </style>
+  <html style="background-color: rgb(50, 50, 71);"></html>
+  <h1>Overwatch Win/Loss Tracker</h1>
+  
+  <form id="win-loss-form">
+    <label>Date:</label>
+    <input type="date" name="date" />
+    <br />
+    <label>Team:</label>
+    <input type="text" name="team" />
+    <br />
+
+    <label>Game Type:</label>
+    <select name="game">
+      <option value="open">Open</option>
+      <option value="support">Support</option>
+      <option value="tank">Tank</option>
+      <option value="damage">Damage</option>
+    </select>
+    <br />
+    <label>Result:</label>
+    <select name="result">
+      <option value="win">Win</option>
+      <option value="loss">Loss</option>
+    </select>
+    <br />
+  <input type="submit" value="Submit" />
+</form>
+
+<h2>Win/Loss History</h2>
+
+<table id="win-loss-table">
+  <tr>
+    <th>Date</th>
+    <th>Team</th>
+    <th>Game Type</th>
+    <th>Result</th>
+    <th>Win Percentage</th>
+  </tr>
+</table>
+
+<button id="clear-data-button">Clear Data</button>
+
+<form id="filter-form">
+  <label>Filter by Date:</label>
+  <input type="date" name="filter-date" />
+  <input type="submit" value="Filter" />
+</form>
+
+<input type="button" id="save-button" value="Save to Text File" />
+
+<script>
+    // Create an object to store the win/loss data for each date
+    var winLossData = {};
+  
+    // Process the form data and add a new row to the table when the form is submitted
+    document.querySelector("#win-loss-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+  
+      var date = event.target.date.value;
+      var team = event.target.team.value;
+      var game = event.target.game.value;
+      var result = event.target.result.value;
+  
+      // Update the win/loss data object for the current date
+      if (!(date in winLossData)) {
+        winLossData[date] = { wins: 0, losses: 0 };
+      }
+  
+      if (result === "win") {
+        winLossData[date].wins++;
+      } else {
+        winLossData[date].losses++;
+      }
+  
+      var table = document.querySelector("#win-loss-table");
+      var row = table.insertRow(-1);
+      var dateCell = row.insertCell(0);
+      var teamCell = row.insertCell(1);
+      var gameCell = row.insertCell(2);
+      var resultCell = row.insertCell(3);
+      var percentageCell = row.insertCell(4);
+  
+      dateCell.innerHTML = date;
+      teamCell.innerHTML = team;
+      gameCell.innerHTML = game;
+      resultCell.innerHTML = result;
+  
+      // Calculate the win percentage for the current date and display it in the table
+      var wins = winLossData[date].wins;
+      var losses = winLossData[date].losses;
+      var total = wins + losses;
+      var percentage = (wins / total) * 100;
+      percentageCell.innerHTML = percentage.toFixed(2) + "%";
+    });
+  
+    // Clear the table data and the win/loss data object when the "Clear Data" button is clicked
+    document.querySelector("#clear-data-button").addEventListener("click", function(event) {
+      winLossData = {};
+      var table = document.querySelector("#win-loss-table");
+      table.innerHTML = "";
+    });
+    
+  
+    // Add a date filter to the table
+    document.querySelector("#filter-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+  
+      var filterDate = event.target["filter-date"].value;
+      var table = document.querySelector("#win-loss-table");
+  
+      for (var i = 1; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        var date = row.cells[0].innerHTML;
+  
+        if (filterDate === "") {
+          row.style.display = "";
+        } else if (date !== filterDate) {
+          row.style.display = "none";
+        } else {
+          row.style.display = "";
+        }
+      }
+    });
+
+    function saveToTextFile() {
+  // Create the text file content by looping through the win/loss data object
+  var textFileContent = "";
+  for (var date in winLossData) {
+    for (var gameType in winLossData[date]) {
+      var wins = winLossData[date].wins;
+      var losses = winLossData[date].losses;
+      var total = wins + losses;
+      var percentage = (wins / total) * 100;
+      textFileContent += `${date} | ${wins} | ${losses} | ${percentage}\n`;
+    }
+  }
+
+  // Create a new Blob object containing the text file content
+  var textFile = new Blob([textFileContent], { type: "text/plain" });
+
+  // Create a link element to trigger the download of the text file
+  var downloadLink = document.createElement("a");
+  downloadLink.download = "overwatch_data.txt" + date;
+  downloadLink.href = window.URL.createObjectURL(textFile);
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+
+  // Click the link to download the text file
+  downloadLink.click();
+
+  // Remove the link element from the page
+  document.body.removeChild(downloadLink);
+}
+
+document.querySelector("#save-button").addEventListener("click", saveToTextFile);
+
+</script>  
